@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: medtrading
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medtrading
+    username: postgres
+    password: password
+
+  profiles:
+    active: dev
+
+  springdoc:
+    api-docs:
+      path: /api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,info,metrics
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+server:
+  port: 8000
