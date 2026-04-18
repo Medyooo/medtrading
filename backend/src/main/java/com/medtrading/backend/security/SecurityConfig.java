@@ -33,7 +33,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
          return  http
                  .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                 .csrf(csrf -> csrf.disable())
+                 .csrf(csrf -> csrf.ignoringRequestMatchers(
+                         "/api/**",
+                         "/swagger-ui/**",
+                         "/swagger-ui.html",
+                         "/v3/api-docs/**",
+                         "/api-docs/**",
+                         "/actuator/**",
+                         "/error"
+                 ))
                  .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                  .exceptionHandling(ex -> ex
                          .authenticationEntryPoint((req, res, e) ->
