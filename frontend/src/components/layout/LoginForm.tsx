@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -198,6 +199,16 @@ export function LoginForm() {
                                     "Se connecter"
                                 )}
                             </Button>
+
+                            <p className="text-center text-sm text-muted-foreground">
+                                Pas encore de compte ?{" "}
+                                <Link
+                                    to="/register"
+                                    className="font-medium text-emerald-600 underline-offset-4 hover:text-emerald-700 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300"
+                                >
+                                    Créer un compte
+                                </Link>
+                            </p>
                         </form>
                     </Form>
                 </CardContent>
