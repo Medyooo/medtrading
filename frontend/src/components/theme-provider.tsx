@@ -12,7 +12,7 @@ import {
     resolveInitialTheme,
     type Theme,
     THEME_STORAGE_KEY,
-} from "@/lib/themeStorage.ts"
+} from "@/lib/themeStorage"
 
 type ThemeContextValue = {
     theme: Theme
