@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.12</version>
+		<version>3.5.13</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.medtrading</groupId>
@@ -28,6 +28,8 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- 10.1.53 still matches CVE-2026-34486/34487/34483 (NVD); fixed in 10.1.54+ -->
+		<tomcat.version>10.1.54</tomcat.version>
 	</properties>
 	<dependencies>
 		<dependency>
