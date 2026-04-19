@@ -1,3 +1,7 @@
+medtrading:
+  dev-demo:
+    enabled: false
+
 spring:
   jpa:
     hibernate:

@@ -3,6 +3,7 @@ package com.medtrading.backend.dto;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class TradeDTO {
@@ -69,5 +70,26 @@ public class TradeDTO {
             BigDecimal totalPnl,
             BigDecimal bestTrade,
             BigDecimal worstTrade
+    ) {}
+
+    public record DailyPnlResponse(
+            LocalDate date,
+            BigDecimal pnl,
+            long totalTrades,
+            long winningTrades,
+            long losingTrades
+    ) {}
+
+    public record TopPairResponse(
+            String symbol,
+            BigDecimal totalPnl,
+            long trades,
+            double winRate
+    ) {}
+
+    public record PnlDistributionResponse(
+            String direction,
+            long count,
+            BigDecimal totalPnl
     ) {}
 }

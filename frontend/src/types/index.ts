@@ -20,7 +20,7 @@ export interface Pair {
 }
 
 
-export type TradeDirection = "BUY" | "SELL"
+export type TradeDirection = "BUY" | "SELL" | "LONG" | "SHORT"
 export type TradeStatus = "OPEN" | "CLOSED"
 
 export interface Trade {
@@ -51,6 +51,26 @@ export interface TradeStats {
     totalPnl: number
     bestTrade: number
     worstTrade: number
+}
+export interface DailyPnl {
+    date: string
+    pnl: number
+    totalTrades: number
+    winningTrades: number
+    losingTrades: number
+}
+
+export interface TopPair {
+    symbol: string
+    totalPnl: number
+    trades: number
+    winRate: number
+}
+
+export interface PnlDistribution {
+    direction: string
+    count: number
+    totalPnl: number
 }
 
 
