@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -87,6 +89,117 @@ public class TradeService {
         );
     }
 
+    public List<TradeDTO.DailyPnlResponse> getDailyPnl(Long userId) {
+        List<Trade> trades = tradeRepository.findByUserId(userId)
+                .stream()
+                .filter(trade -> trade.getStatus().equals("CLOSED"))
+                .filter(trade -> trade.getProfitLoss() != null)
+                .sorted(Comparator.comparing(Trade::getClosedAt))
+                .toList();
+
+        Map<LocalDate, List<Trade>> tradesByDay = trades.stream()
+                .collect(Collectors.groupingBy(
+                        trade -> trade.getClosedAt().toLocalDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        return tradesByDay.entrySet().stream()
+                .map(entry -> {
+                    LocalDate date = entry.getKey();
+                    List<Trade> dayTrades = entry.getValue();
+
+                    BigDecimal pnl = dayTrades.stream()
+                            .map(Trade::getProfitLoss)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    long winning = dayTrades.stream()
+                            .filter(trade -> trade.getProfitLoss().compareTo(BigDecimal.ZERO) > 0)
+                            .count();
+
+                    long losing = dayTrades.stream()
+                            .filter(trade -> trade.getProfitLoss().compareTo(BigDecimal.ZERO) < 0)
+                            .count();
+
+                    return new TradeDTO.DailyPnlResponse(
+                            date,
+                            pnl,
+                            dayTrades.size(),
+                            winning,
+                            losing
+                    );
+                })
+                .toList();
+    }
+
+    public List<TradeDTO.TopPairResponse> getTopPairs(Long userId) {
+        List<Trade> trades = tradeRepository.findByUserId(userId)
+                .stream()
+                .filter(trade -> trade.getStatus().equals("CLOSED"))
+                .filter(trade -> trade.getProfitLoss() != null)
+                .toList();
+
+        Map<String, List<Trade>> byPair = trades.stream()
+                .collect(Collectors.groupingBy(trade -> trade.getPair().getSymbol()));
+
+        return byPair.entrySet().stream()
+                .map(entry -> {
+                    String symbol = entry.getKey();
+                    List<Trade> pairTrades = entry.getValue();
+
+                    BigDecimal totalPnl = pairTrades.stream()
+                            .map(Trade::getProfitLoss)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    long winning = pairTrades.stream()
+                            .filter(trade -> trade.getProfitLoss().compareTo(BigDecimal.ZERO) > 0)
+                            .count();
+
+                    double winRate = (double) winning / pairTrades.size() * 100;
+
+                    return new TradeDTO.TopPairResponse(
+                            symbol,
+                            totalPnl,
+                            pairTrades.size(),
+                            Math.round(winRate * 100.0) / 100.0
+                    );
+                })
+                .sorted(Comparator.comparing(TradeDTO.TopPairResponse::totalPnl).reversed())
+                .toList();
+    }
+
+    public List<TradeDTO.PnlDistributionResponse> getPnlDistribution(Long userId) {
+        List<Trade> trades = tradeRepository.findByUserId(userId)
+                .stream()
+                .filter(trade -> trade.getStatus().equals("CLOSED"))
+                .filter(trade -> trade.getProfitLoss() != null)
+                .toList();
+
+        Map<String, List<Trade>> byDirection = trades.stream()
+                .collect(Collectors.groupingBy(Trade::getDirection));
+
+        return byDirection.entrySet().stream()
+                .map(entry -> {
+                    BigDecimal totalPnl = entry.getValue().stream()
+                            .map(Trade::getProfitLoss)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return new TradeDTO.PnlDistributionResponse(
+                            entry.getKey(),
+                            entry.getValue().size(),
+                            totalPnl
+                    );
+                })
+                .toList();}
+
+    public List<TradeDTO.TradeResponse> getRecentTrades(Long userId) {
+        return tradeRepository.findByUserId(userId)
+                .stream()
+                .sorted(Comparator.comparing(Trade::getOpenedAt).reversed())
+                .limit(5)
+                .map(this::toResponse)
+                .toList();
+    }
     public TradeDTO.TradeResponse getTradeById(long id, long userId){
         Trade trade = tradeRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Trade introuvable avec l'id " + id));

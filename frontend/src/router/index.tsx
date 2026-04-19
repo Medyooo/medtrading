@@ -4,6 +4,7 @@ import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
 import SettingsPage from "@/pages/settings/SettingsPage"
 import ProtectedRoute from "@/router/ProtectedRoute"
+import DashboardPage from "@/pages/DashboardPage.tsx";
 
 export const router = createBrowserRouter([
     { path: "/login", element: <LoginPage /> },
@@ -14,7 +15,7 @@ export const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
                 <MainLayout>
-                    <div>Dashboard — coming soon</div>
+                    <DashboardPage />
                 </MainLayout>
             </ProtectedRoute>
         ),

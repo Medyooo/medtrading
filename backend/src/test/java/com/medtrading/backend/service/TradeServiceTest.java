@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -234,6 +236,205 @@ public class TradeServiceTest {
         assertEquals(BigDecimal.ZERO, stats.totalPnl());
         assertEquals(BigDecimal.ZERO, stats.bestTrade());
         assertEquals(BigDecimal.ZERO, stats.worstTrade());
+    }
+    @Test
+    void getDailyPnl_success() {
+        Trade trade1 = new Trade();
+        trade1.setUser(testUser);
+        trade1.setPair(testPair);
+        trade1.setStatus("CLOSED");
+        trade1.setProfitLoss(new BigDecimal("150.00"));
+        trade1.setClosedAt(LocalDateTime.of(2026, 4, 1, 10, 0));
+
+        Trade trade2 = new Trade();
+        trade2.setUser(testUser);
+        trade2.setPair(testPair);
+        trade2.setStatus("CLOSED");
+        trade2.setProfitLoss(new BigDecimal("-50.00"));
+        trade2.setClosedAt(LocalDateTime.of(2026, 4, 1, 15, 0));
+
+        Trade trade3 = new Trade();
+        trade3.setUser(testUser);
+        trade3.setPair(testPair);
+        trade3.setStatus("CLOSED");
+        trade3.setProfitLoss(new BigDecimal("200.00"));
+        trade3.setClosedAt(LocalDateTime.of(2026, 4, 2, 10, 0));
+
+        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(trade1, trade2, trade3));
+
+        List<TradeDTO.DailyPnlResponse> result = tradeService.getDailyPnl(1L);
+
+        assertEquals(2, result.size());
+
+        // Jour 1 — 01/04
+        assertEquals(LocalDate.of(2026, 4, 1), result.get(0).date());
+        assertEquals(new BigDecimal("100.00"), result.get(0).pnl());
+        assertEquals(2, result.get(0).totalTrades());
+        assertEquals(1, result.get(0).winningTrades());
+        assertEquals(1, result.get(0).losingTrades());
+
+        // Jour 2 — 02/04
+        assertEquals(LocalDate.of(2026, 4, 2), result.get(1).date());
+        assertEquals(new BigDecimal("200.00"), result.get(1).pnl());
+        assertEquals(1, result.get(1).totalTrades());
+        assertEquals(1, result.get(1).winningTrades());
+        assertEquals(0, result.get(1).losingTrades());
+    }
+
+    @Test
+    void getDailyPnl_ignoresOpenTrades() {
+        Trade openTrade = new Trade();
+        openTrade.setUser(testUser);
+        openTrade.setPair(testPair);
+        openTrade.setStatus("OPEN");
+
+        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(openTrade));
+
+        List<TradeDTO.DailyPnlResponse> result = tradeService.getDailyPnl(1L);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    void getTopPairs_success() {
+        Trade xauTrade1 = new Trade();
+        xauTrade1.setUser(testUser);
+        xauTrade1.setPair(testPair); // XAUUSD
+        xauTrade1.setStatus("CLOSED");
+        xauTrade1.setProfitLoss(new BigDecimal("300.00"));
+
+        Trade xauTrade2 = new Trade();
+        xauTrade2.setUser(testUser);
+        xauTrade2.setPair(testPair); // XAUUSD
+        xauTrade2.setStatus("CLOSED");
+        xauTrade2.setProfitLoss(new BigDecimal("-100.00"));
+
+        Pair eurPair = new Pair();
+        eurPair.setId(2L);
+        eurPair.setSymbol("EURUSD");
+        eurPair.setName("Euro / US Dollar");
+
+        Trade eurTrade = new Trade();
+        eurTrade.setUser(testUser);
+        eurTrade.setPair(eurPair);
+        eurTrade.setStatus("CLOSED");
+        eurTrade.setProfitLoss(new BigDecimal("150.00"));
+
+        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(xauTrade1, xauTrade2, eurTrade));
+
+        List<TradeDTO.TopPairResponse> result = tradeService.getTopPairs(1L);
+
+        assertEquals(2, result.size());
+
+        // XAUUSD en premier — PnL 200$ > EURUSD 150$
+        assertEquals("XAUUSD", result.get(0).symbol());
+        assertEquals(new BigDecimal("200.00"), result.get(0).totalPnl());
+        assertEquals(2, result.get(0).trades());
+        assertEquals(50.0, result.get(0).winRate());
+
+        // EURUSD en deuxième
+        assertEquals("EURUSD", result.get(1).symbol());
+        assertEquals(new BigDecimal("150.00"), result.get(1).totalPnl());
+        assertEquals(1, result.get(1).trades());
+        assertEquals(100.0, result.get(1).winRate());
+    }
+    @Test
+    void getPnlDistribution_success() {
+        Trade buyWin = new Trade();
+        buyWin.setUser(testUser);
+        buyWin.setPair(testPair);
+        buyWin.setDirection("BUY");
+        buyWin.setStatus("CLOSED");
+        buyWin.setProfitLoss(new BigDecimal("200.00"));
+
+        Trade buyLoss = new Trade();
+        buyLoss.setUser(testUser);
+        buyLoss.setPair(testPair);
+        buyLoss.setDirection("BUY");
+        buyLoss.setStatus("CLOSED");
+        buyLoss.setProfitLoss(new BigDecimal("-50.00"));
+
+        Trade sellWin = new Trade();
+        sellWin.setUser(testUser);
+        sellWin.setPair(testPair);
+        sellWin.setDirection("SELL");
+        sellWin.setStatus("CLOSED");
+        sellWin.setProfitLoss(new BigDecimal("100.00"));
+
+        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(buyWin, buyLoss, sellWin));
+
+        List<TradeDTO.PnlDistributionResponse> result = tradeService.getPnlDistribution(1L);
+
+        assertEquals(2, result.size());
+
+        TradeDTO.PnlDistributionResponse buy = result.stream()
+                .filter(r -> r.direction().equals("BUY"))
+                .findFirst()
+                .orElseThrow();
+
+        TradeDTO.PnlDistributionResponse sell = result.stream()
+                .filter(r -> r.direction().equals("SELL"))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(2, buy.count());
+        assertEquals(new BigDecimal("150.00"), buy.totalPnl());
+        assertEquals(1, sell.count());
+        assertEquals(new BigDecimal("100.00"), sell.totalPnl());
+    }
+
+    @Test
+    void getRecentTrades_returnsMax5() {
+        List<Trade> trades = new java.util.ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            Trade t = new Trade();
+            t.setId((long) i);
+            t.setUser(testUser);
+            t.setPair(testPair);
+            t.setDirection("BUY");
+            t.setStatus("OPEN");
+            t.setEntryPrice(new BigDecimal("2650.00"));
+            t.setLotSize(new BigDecimal("0.10"));
+            t.setOpenedAt(LocalDateTime.now().minusDays(i));
+            trades.add(t);
+        }
+
+        when(tradeRepository.findByUserId(1L)).thenReturn(trades);
+
+        List<TradeDTO.TradeResponse> result = tradeService.getRecentTrades(1L);
+
+        assertEquals(5, result.size());
+    }
+
+    @Test
+    void getRecentTrades_orderedByMostRecent() {
+        Trade older = new Trade();
+        older.setId(1L);
+        older.setUser(testUser);
+        older.setPair(testPair);
+        older.setDirection("BUY");
+        older.setStatus("OPEN");
+        older.setEntryPrice(new BigDecimal("2650.00"));
+        older.setLotSize(new BigDecimal("0.10"));
+        older.setOpenedAt(LocalDateTime.now().minusDays(2));
+
+        Trade newer = new Trade();
+        newer.setId(2L);
+        newer.setUser(testUser);
+        newer.setPair(testPair);
+        newer.setDirection("SELL");
+        newer.setStatus("OPEN");
+        newer.setEntryPrice(new BigDecimal("2660.00"));
+        newer.setLotSize(new BigDecimal("0.10"));
+        newer.setOpenedAt(LocalDateTime.now().minusDays(1));
+
+        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(older, newer));
+
+        List<TradeDTO.TradeResponse> result = tradeService.getRecentTrades(1L);
+
+        assertEquals(2, result.size());
+        assertEquals("SELL", result.get(0).direction()); // ← plus récent en premier
+        assertEquals("BUY", result.get(1).direction());
     }
 
 }

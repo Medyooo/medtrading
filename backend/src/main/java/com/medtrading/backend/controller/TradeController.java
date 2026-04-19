@@ -60,4 +60,27 @@ public class TradeController {
         Long userId = authService.getCurrentUser().getId();
         return tradeService.getTradeStats(userId);
     }
+    @GetMapping("/stats/daily-pnl")
+    public List<TradeDTO.DailyPnlResponse> getDailyPnl() {
+        Long userId = authService.getCurrentUser().getId();
+        return tradeService.getDailyPnl(userId);
+    }
+
+    @GetMapping("/stats/top-pairs")
+    public List<TradeDTO.TopPairResponse> getTopPairs() {
+        Long userId = authService.getCurrentUser().getId();
+        return tradeService.getTopPairs(userId);
+    }
+
+    @GetMapping("/stats/distribution")
+    public List<TradeDTO.PnlDistributionResponse> getPnlDistribution() {
+        Long userId = authService.getCurrentUser().getId();
+        return tradeService.getPnlDistribution(userId);
+    }
+
+    @GetMapping("/recent")
+    public List<TradeDTO.TradeResponse> getRecentTrades() {
+        Long userId = authService.getCurrentUser().getId();
+        return tradeService.getRecentTrades(userId);
+    }
 }
