@@ -1,0 +1,36 @@
+meta {
+  name: Login
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+      "email": "arbielbaidi6@gmail.com",
+      "password": "arbi16072002"
+  }
+}
+
+body:text {
+  {"email":"{{email}}","password":"{{password}}"}
+}
+
+script:post-response {
+  if (res.body && res.body.token) {
+    bru.setEnvVar("token", res.body.token);
+  }
+}
+
+docs {
+  POST /api/auth/login — enregistre le JWT dans la variable d’environnement token.
+}

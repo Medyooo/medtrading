@@ -63,13 +63,15 @@ public class TradeControllerTest {
         TradeDTO.TradeResponse response = new TradeDTO.TradeResponse(
                 1L, "XAUUSD", "BUY", new BigDecimal("2650.50"),
                 null, null, null, new BigDecimal("0.10"),
-                null, "OPEN", "Breakout", "H4", null, null, null
+                null, "OPEN", "Breakout", "H4", null, null, null,
+                null
         );
         when(tradeService.createTrade(eq(1L), any())).thenReturn(response);
 
         TradeDTO.CreateTradeRequest request = new TradeDTO.CreateTradeRequest(
                 1L, "BUY", new BigDecimal("2650.50"), null, null,
-                new BigDecimal("0.10"), "Breakout", "H4", null
+                new BigDecimal("0.10"), "Breakout", "H4", null,
+                null
         );
 
         mockMvc.perform(post("/api/trades")
@@ -84,7 +86,8 @@ public class TradeControllerTest {
     void createTrade_without_auth_returns401() throws Exception {
         TradeDTO.CreateTradeRequest request = new TradeDTO.CreateTradeRequest(
                 1L, "BUY", new BigDecimal("2650.50"), null, null,
-                new BigDecimal("0.10"), null, null, null
+                new BigDecimal("0.10"), null, null, null,
+                null
         );
 
         mockMvc.perform(post("/api/trades")
@@ -114,18 +117,19 @@ public class TradeControllerTest {
                 1L, "XAUUSD", "BUY", new BigDecimal("2650.50"),
                 null, null, null, new BigDecimal("0.10"),
                 null, "OPEN", "Breakout", "H4", null,
-                LocalDateTime.now(), null
+                LocalDateTime.now(), null,
+                null
         );
         when(tradeService.getTradesByUser(1L)).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/trades/user/1"))
+        mockMvc.perform(get("/api/trades/user/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].pairSymbol").value("XAUUSD"));
     }
 
     @Test
     void getMyTrades_without_auth_returns401() throws Exception {
-        mockMvc.perform(get("/api/trades/user/1"))
+        mockMvc.perform(get("/api/trades/user/me"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -140,7 +144,8 @@ public class TradeControllerTest {
                 1L, "XAUUSD", "BUY", new BigDecimal("2650.50"),
                 null, null, null, new BigDecimal("0.10"),
                 null, "OPEN", "Breakout", "H4", null,
-                LocalDateTime.now(), null
+                LocalDateTime.now(), null,
+                null
         );
         when(tradeService.getTradeById(1L, 1L)).thenReturn(response);
 
@@ -160,7 +165,8 @@ public class TradeControllerTest {
                 1L, "XAUUSD", "BUY", new BigDecimal("2650.50"),
                 new BigDecimal("2680.00"), null, null, new BigDecimal("0.10"),
                 new BigDecimal("2950.00"), "CLOSED", "Breakout", "H4", null,
-                LocalDateTime.now(), LocalDateTime.now()
+                LocalDateTime.now(), LocalDateTime.now(),
+                null
         );
         when(tradeService.closeTrade(eq(1L), any(), eq(1L))).thenReturn(response);
 
@@ -255,7 +261,8 @@ public class TradeControllerTest {
                 1L, "XAUUSD", "BUY", new BigDecimal("2650.50"),
                 null, null, null, new BigDecimal("0.10"),
                 null, "OPEN", "Breakout", "H4", null,
-                LocalDateTime.now(), null
+                LocalDateTime.now(), null,
+                null
         );
         when(tradeService.getRecentTrades(1L)).thenReturn(List.of(response));
 

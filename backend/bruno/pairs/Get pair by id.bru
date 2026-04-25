@@ -1,0 +1,21 @@
+meta {
+  name: Get pair by id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/pairs/:id
+}
+
+params:path {
+  id: {{pairId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/pairs/{id}
+}

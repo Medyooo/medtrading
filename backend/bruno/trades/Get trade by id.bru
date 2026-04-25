@@ -1,0 +1,21 @@
+meta {
+  name: Get trade by id
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/trades/:id
+}
+
+params:path {
+  id: {{tradeId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/trades/{id}
+}

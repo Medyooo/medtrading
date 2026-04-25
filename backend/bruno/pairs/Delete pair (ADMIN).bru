@@ -1,0 +1,21 @@
+meta {
+  name: Delete pair (ADMIN)
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/pairs/:id
+}
+
+params:path {
+  id: {{pairId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  DELETE /api/pairs/{id} — ADMIN.
+}

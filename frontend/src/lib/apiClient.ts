@@ -36,7 +36,7 @@ export const apiClient = {
         return response.json()
     },
 
-    delete: async <T>(url: string, token?: string): Promise<T> => {
+    delete: async <T>(url: string, token?: string): Promise<T | undefined> => {
         const response = await fetch(`${BASE_URL}${url}`, {
             method: "DELETE",
             headers: {
@@ -44,12 +44,24 @@ export const apiClient = {
             },
         })
 
+        const text = await response.text()
+
         if (!response.ok) {
-            const error: ApiError = await response.json()
-            throw error
+            try {
+                const parsed = JSON.parse(text) as ApiError
+                throw parsed
+            } catch (e) {
+                if (e && typeof e === "object" && "message" in e) throw e
+            }
+            throw {
+                status: response.status,
+                message: text.trim() || response.statusText,
+                timestamp: new Date().toISOString(),
+            } satisfies ApiError
         }
 
-        return response.json()
+        if (!text.trim()) return undefined
+        return JSON.parse(text) as T
     },
 
     put: async <T>(url: string, body: unknown, token?: string): Promise<T> => {

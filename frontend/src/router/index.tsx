@@ -4,8 +4,9 @@ import LoginPage from "@/pages/auth/LoginPage"
 import RegisterPage from "@/pages/auth/RegisterPage"
 import SettingsPage from "@/pages/settings/SettingsPage"
 import ProtectedRoute from "@/router/ProtectedRoute"
-import DashboardPage from "@/pages/DashboardPage.tsx";
-import AnalysisPage from "@/pages/AnalysisPage.tsx";
+import DashboardPage from "@/pages/DashboardPage.tsx"
+import AnalysisPage from "@/pages/AnalysisPage.tsx"
+import TradesPage from "@/pages/TradesPage"
 
 export const router = createBrowserRouter([
     { path: "/login", element: <LoginPage /> },
@@ -26,7 +27,7 @@ export const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
                 <MainLayout>
-                    <div>Trades — coming soon</div>
+                    <TradesPage />
                 </MainLayout>
             </ProtectedRoute>
         ),

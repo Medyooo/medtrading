@@ -23,7 +23,7 @@ public class TradeController {
         this.authService = authService;
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user/me")
     public List<TradeDTO.TradeResponse> getMyTrades() {
         Long userId = authService.getCurrentUser().getId();
         return tradeService.getTradesByUser(userId);

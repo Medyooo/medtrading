@@ -3,7 +3,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser"
 import { useDashboardStats } from "@/hooks/useDashboardStats"
 import { PnlChart } from "@/components/dashboard/PnlChart"
 import { TopPairsChart } from "@/components/dashboard/TopPairsChart"
-import { LatestTradesTable } from "@/components/dashboard/LatestTradesTable"
+import { TradeTable } from "@/components/trades/TradeTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { TrendingUp, TrendingDown, BarChart2, Target, Trophy, AlertTriangle, Plus } from "lucide-react"
@@ -155,7 +155,28 @@ export default function DashboardPage() {
                 <PnlChart data={dailyPnl} />
                 <TopPairsChart data={topPairs} />
                 <div className="lg:col-span-2">
-                    <LatestTradesTable trades={recentTrades} />
+                    <Card className="overflow-hidden rounded-xl border border-border/80 shadow-sm">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                                Derniers trades
+                            </CardTitle>
+                            <Link
+                                to="/trades"
+                                className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                            >
+                                Voir tout
+                            </Link>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <TradeTable
+                                trades={recentTrades}
+                                isLoading={false}
+                                embedded
+                                showActions={false}
+                                emptySubtitle="Vos derniers trades apparaîtront ici."
+                            />
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </div>

@@ -1,0 +1,21 @@
+meta {
+  name: Delete user (ADMIN)
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/users/:id
+}
+
+params:path {
+  id: {{targetUserId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  DELETE /api/users/{id} — ADMIN.
+}

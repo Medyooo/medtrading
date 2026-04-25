@@ -1,0 +1,21 @@
+meta {
+  name: Delete trade
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/trades/:id
+}
+
+params:path {
+  id: {{tradeId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  DELETE /api/trades/{id}
+}

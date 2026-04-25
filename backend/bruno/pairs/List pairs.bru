@@ -1,0 +1,17 @@
+meta {
+  name: List pairs
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/pairs
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/pairs
+}

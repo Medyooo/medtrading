@@ -1,0 +1,17 @@
+meta {
+  name: List users (ADMIN)
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/users
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/users — rôle ADMIN.
+}

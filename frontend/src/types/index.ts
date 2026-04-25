@@ -39,6 +39,7 @@ export interface Trade {
     notes?: string
     openedAt: string
     closedAt?: string
+    riskRewardRatio?: number | null
 }
 
 export interface TradeStats {
