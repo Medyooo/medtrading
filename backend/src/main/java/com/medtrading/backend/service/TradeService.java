@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -34,7 +35,7 @@ public class TradeService {
     }
 
     public List<TradeDTO.TradeResponse> getTradesByUser(Long userId) {
-        return tradeRepository.findByUserId(userId)
+        return tradeRepository.findByUserIdOrderByOpenedAtDesc(userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -105,6 +106,7 @@ public class TradeService {
                 ));
 
         return tradesByDay.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
                 .map(entry -> {
                     LocalDate date = entry.getKey();
                     List<Trade> dayTrades = entry.getValue();
@@ -193,9 +195,8 @@ public class TradeService {
                 .toList();}
 
     public List<TradeDTO.TradeResponse> getRecentTrades(Long userId) {
-        return tradeRepository.findByUserId(userId)
+        return tradeRepository.findByUserIdOrderByOpenedAtDesc(userId)
                 .stream()
-                .sorted(Comparator.comparing(Trade::getOpenedAt).reversed())
                 .limit(5)
                 .map(this::toResponse)
                 .toList();
@@ -230,6 +231,12 @@ public class TradeService {
         trade.setStrategy(request.strategy());
         trade.setTimeframe(request.timeframe());
         trade.setNotes(request.notes());
+        BigDecimal rr = request.riskRewardRatio();
+        if (rr == null) {
+            rr = computePlannedRiskRewardRatio(
+                    request.entryPrice(), request.stopLoss(), request.takeProfit(), request.direction());
+        }
+        trade.setRiskRewardRatio(rr != null ? rr.setScale(4, RoundingMode.HALF_UP) : null);
         trade.setStatus("OPEN");
         trade.setOpenedAt(LocalDateTime.now());
 
@@ -288,9 +295,43 @@ public class TradeService {
                 trade.getTimeframe(),
                 trade.getNotes(),
                 trade.getOpenedAt(),
-                trade.getClosedAt()
-
+                trade.getClosedAt(),
+                trade.getRiskRewardRatio()
         );
+    }
+
+
+    private static BigDecimal computePlannedRiskRewardRatio(
+            BigDecimal entry, BigDecimal sl, BigDecimal tp, String direction) {
+        if (entry == null || sl == null || tp == null || direction == null) {
+            return null;
+        }
+        String d = direction.trim().toUpperCase(Locale.ROOT);
+        boolean preferShort = "SHORT".equals(d) || "SELL".equals(d);
+        BigDecimal shortR = rrShort(entry, sl, tp);
+        BigDecimal longR = rrLong(entry, sl, tp);
+        BigDecimal chosen = preferShort
+                ? (shortR != null ? shortR : longR)
+                : (longR != null ? longR : shortR);
+        return chosen;
+    }
+
+    private static BigDecimal rrLong(BigDecimal entry, BigDecimal sl, BigDecimal tp) {
+        BigDecimal risk = entry.subtract(sl);
+        BigDecimal reward = tp.subtract(entry);
+        if (risk.compareTo(BigDecimal.ZERO) <= 0 || reward.compareTo(BigDecimal.ZERO) <= 0) {
+            return null;
+        }
+        return reward.divide(risk, 8, RoundingMode.HALF_UP);
+    }
+
+    private static BigDecimal rrShort(BigDecimal entry, BigDecimal sl, BigDecimal tp) {
+        BigDecimal risk = sl.subtract(entry);
+        BigDecimal reward = entry.subtract(tp);
+        if (risk.compareTo(BigDecimal.ZERO) <= 0 || reward.compareTo(BigDecimal.ZERO) <= 0) {
+            return null;
+        }
+        return reward.divide(risk, 8, RoundingMode.HALF_UP);
     }
 
     private void calculateProfitLoss(Trade trade) {

@@ -30,6 +30,8 @@
 		<java.version>21</java.version>
 		<!-- 10.1.53 still matches CVE-2026-34486/34487/34483 (NVD); fixed in 10.1.54+ -->
 		<tomcat.version>10.1.54</tomcat.version>
+		<!-- Spring Boot 3.5.13 pulls log4j 2.24.x; 2.25.4+ fixes CVE-2026-34478 / 34480 / 34481 (OWASP dependency-check) -->
+		<log4j2.version>2.25.4</log4j2.version>
 	</properties>
 	<dependencies>
 		<dependency>

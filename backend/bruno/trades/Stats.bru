@@ -1,0 +1,17 @@
+meta {
+  name: Trade stats
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/trades/stats
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/trades/stats
+}

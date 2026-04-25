@@ -1,0 +1,26 @@
+meta {
+  name: Close trade
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/trades/:id/close
+}
+
+params:path {
+  id: {{tradeId}}
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:text {
+  {"exitPrice":2660}
+}
+
+docs {
+  POST /api/trades/{id}/close
+}

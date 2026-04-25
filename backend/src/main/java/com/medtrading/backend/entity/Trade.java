@@ -61,4 +61,7 @@ public class Trade {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(precision = 12, scale = 4)
+    private BigDecimal riskRewardRatio;
+
 }

@@ -1,0 +1,22 @@
+meta {
+  name: Update profile (me)
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/users/me
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:text {
+  {"username":"nouveau-nom","email":"{{email}}"}
+}
+
+docs {
+  PUT /api/users/me
+}

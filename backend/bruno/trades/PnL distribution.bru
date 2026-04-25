@@ -1,0 +1,17 @@
+meta {
+  name: PnL distribution
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/trades/stats/distribution
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/trades/stats/distribution
+}

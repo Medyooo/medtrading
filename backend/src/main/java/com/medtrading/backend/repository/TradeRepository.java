@@ -9,5 +9,7 @@ public interface TradeRepository extends JpaRepository<Trade, Long> {
 
     List<Trade> findByUserId(Long userId);
 
+    List<Trade> findByUserIdOrderByOpenedAtDesc(Long userId);
+
     List<Trade> findByUserIdAndStatus(Long userId, String status);
 }

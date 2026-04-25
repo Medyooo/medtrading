@@ -1,0 +1,18 @@
+meta {
+  name: List my trades
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/trades/user/me
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/trades/user/me — liste des trades de l’utilisateur connecté (JWT).
+}
+

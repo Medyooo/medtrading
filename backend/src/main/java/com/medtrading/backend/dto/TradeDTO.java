@@ -33,7 +33,10 @@ public class TradeDTO {
             @Size(max = 20)
             String timeframe,
 
-            String notes
+            String notes,
+
+            @Positive(message = "Le ratio R/R doit être positif")
+            BigDecimal riskRewardRatio
     ) {}
 
     public record CloseTradeRequest(
@@ -57,7 +60,8 @@ public class TradeDTO {
             String timeframe,
             String notes,
             LocalDateTime openedAt,
-            LocalDateTime closedAt
+            LocalDateTime closedAt,
+            BigDecimal riskRewardRatio
     ) {}
 
     public record TradeStatsResponse(

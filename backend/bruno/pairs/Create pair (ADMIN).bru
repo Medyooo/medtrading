@@ -1,0 +1,22 @@
+meta {
+  name: Create pair (ADMIN)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/pairs
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:text {
+  {"symbol":"TESTUSD","name":"Paire test","baseCurrency":"TST","quoteCurrency":"USD"}
+}
+
+docs {
+  POST /api/pairs — ADMIN.
+}

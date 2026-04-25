@@ -26,6 +26,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.ArgumentCaptor;
 
 @ExtendWith(MockitoExtension.class)
 public class TradeServiceTest {
@@ -77,7 +78,8 @@ public class TradeServiceTest {
         when(tradeRepository.save(any(Trade.class))).thenReturn(testTrade);
 
         TradeDTO.CreateTradeRequest request = new TradeDTO.CreateTradeRequest(
-                1L, "BUY", new BigDecimal("2650.50"), null, null, new BigDecimal("0.10"), "Breakout", "H4", null
+                1L, "BUY", new BigDecimal("2650.50"), null, null, new BigDecimal("0.10"), "Breakout", "H4", null,
+                null
         );
 
         TradeDTO.TradeResponse response = tradeService.createTrade(1L, request);
@@ -89,12 +91,43 @@ public class TradeServiceTest {
     }
 
     @Test
+    void createTrade_computesRiskRewardRatio_fromStopLossAndTakeProfit() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(pairRepository.findById(1L)).thenReturn(Optional.of(testPair));
+        when(tradeRepository.save(any(Trade.class))).thenAnswer(invocation -> {
+            Trade t = invocation.getArgument(0);
+            t.setId(99L);
+            return t;
+        });
+
+        TradeDTO.CreateTradeRequest request = new TradeDTO.CreateTradeRequest(
+                1L,
+                "LONG",
+                new BigDecimal("100"),
+                new BigDecimal("90"),
+                new BigDecimal("120"),
+                new BigDecimal("0.10"),
+                null,
+                null,
+                null,
+                null);
+
+        TradeDTO.TradeResponse response = tradeService.createTrade(1L, request);
+
+        ArgumentCaptor<Trade> captor = ArgumentCaptor.forClass(Trade.class);
+        verify(tradeRepository).save(captor.capture());
+        assertEquals(0, new BigDecimal("2.0000").compareTo(captor.getValue().getRiskRewardRatio()));
+        assertEquals(0, new BigDecimal("2.0000").compareTo(response.riskRewardRatio()));
+    }
+
+    @Test
     void createTrade_userNotFound_throws404() {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         TradeDTO.CreateTradeRequest request = new TradeDTO.CreateTradeRequest(
                 1L, "BUY", new BigDecimal("2650.50"), null, null,
-                new BigDecimal("0.10"), null, null, null
+                new BigDecimal("0.10"), null, null, null,
+                null
         );
 
         ApiException exception = assertThrows(ApiException.class, () -> {
@@ -183,7 +216,7 @@ public class TradeServiceTest {
 
     @Test
     void getTradesByUser_returnsList() {
-        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(testTrade));
+        when(tradeRepository.findByUserIdOrderByOpenedAtDesc(1L)).thenReturn(List.of(testTrade));
 
         List<TradeDTO.TradeResponse> trades = tradeService.getTradesByUser(1L);
 
@@ -399,7 +432,7 @@ public class TradeServiceTest {
             trades.add(t);
         }
 
-        when(tradeRepository.findByUserId(1L)).thenReturn(trades);
+        when(tradeRepository.findByUserIdOrderByOpenedAtDesc(1L)).thenReturn(trades);
 
         List<TradeDTO.TradeResponse> result = tradeService.getRecentTrades(1L);
 
@@ -428,7 +461,7 @@ public class TradeServiceTest {
         newer.setLotSize(new BigDecimal("0.10"));
         newer.setOpenedAt(LocalDateTime.now().minusDays(1));
 
-        when(tradeRepository.findByUserId(1L)).thenReturn(List.of(older, newer));
+        when(tradeRepository.findByUserIdOrderByOpenedAtDesc(1L)).thenReturn(List.of(newer, older));
 
         List<TradeDTO.TradeResponse> result = tradeService.getRecentTrades(1L);
 

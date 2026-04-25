@@ -1,0 +1,17 @@
+meta {
+  name: Recent trades
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/trades/recent
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/trades/recent
+}

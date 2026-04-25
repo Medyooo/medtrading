@@ -1,0 +1,26 @@
+meta {
+  name: Update pair (ADMIN)
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/pairs/:id
+}
+
+params:path {
+  id: {{pairId}}
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:text {
+  {"symbol":"TESTUSD","name":"Paire test (maj)","baseCurrency":"TST","quoteCurrency":"USD"}
+}
+
+docs {
+  PUT /api/pairs/{id} — ADMIN.
+}

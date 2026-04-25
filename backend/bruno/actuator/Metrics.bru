@@ -1,0 +1,17 @@
+meta {
+  name: Metrics index
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{host}}/actuator/metrics
+}
+
+headers {
+  Accept: application/json
+}
+
+docs {
+  GET /actuator/metrics
+}

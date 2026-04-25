@@ -1,0 +1,22 @@
+meta {
+  name: Create trade
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/trades
+}
+
+headers {
+  content-type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:text {
+  {"pairId":1,"direction":"LONG","entryPrice":2650.5,"stopLoss":2640,"takeProfit":2680,"lotSize":0.1,"strategy":"Bruno","timeframe":"H1"}
+}
+
+docs {
+  POST /api/trades — adapter pairId (GET /api/pairs).
+}

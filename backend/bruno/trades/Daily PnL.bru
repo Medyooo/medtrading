@@ -1,0 +1,17 @@
+meta {
+  name: Daily PnL
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/trades/stats/daily-pnl
+}
+
+headers {
+  Authorization: Bearer {{token}}
+}
+
+docs {
+  GET /api/trades/stats/daily-pnl
+}
